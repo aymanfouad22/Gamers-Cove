@@ -1,6 +1,7 @@
 package org.example.gamerscove.controllers;
 
 import org.example.gamerscove.domain.dto.GameDto;
+import org.example.gamerscove.domain.dto.IGDBGameResponseDto;
 import org.example.gamerscove.domain.entities.GameEntity;
 import org.example.gamerscove.mappers.Mapper;
 import org.example.gamerscove.services.GameService;
@@ -47,78 +48,6 @@ public class GameController {
         this.restTemplate = restTemplate;
     }
 
-    // Simple DTOs for IGDB API Response (only what we need)
-    public static class IGDBGameResponse {
-        @JsonProperty("id")
-        private Long id;
-
-        @JsonProperty("name")
-        private String name;
-
-        @JsonProperty("summary")
-        private String summary;
-
-        @JsonProperty("cover")
-        private IGDBCover cover;
-
-        @JsonProperty("first_release_date")
-        private Long firstReleaseDate;
-
-        @JsonProperty("platforms")
-        private List<IGDBPlatform> platforms;
-
-        @JsonProperty("genres")
-        private List<IGDBGenre> genres;
-
-        // Getters and setters
-        public Long getId() { return id; }
-        public void setId(Long id) { this.id = id; }
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-
-        public String getSummary() { return summary; }
-        public void setSummary(String summary) { this.summary = summary; }
-
-        public IGDBCover getCover() { return cover; }
-        public void setCover(IGDBCover cover) { this.cover = cover; }
-
-        public Long getFirstReleaseDate() { return firstReleaseDate; }
-        public void setFirstReleaseDate(Long firstReleaseDate) { this.firstReleaseDate = firstReleaseDate; }
-
-        public List<IGDBPlatform> getPlatforms() { return platforms; }
-        public void setPlatforms(List<IGDBPlatform> platforms) { this.platforms = platforms; }
-
-        public List<IGDBGenre> getGenres() { return genres; }
-        public void setGenres(List<IGDBGenre> genres) { this.genres = genres; }
-    }
-
-    public static class IGDBCover {
-        @JsonProperty("image_id")
-        private String imageId;
-
-        public String getImageId() { return imageId; }
-        public void setImageId(String imageId) { this.imageId = imageId; }
-    }
-
-    public static class IGDBPlatform {
-        @JsonProperty("name")
-        private String name;
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-    }
-
-    public static class IGDBGenre {
-        @JsonProperty("name")
-        private String name;
-
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-    }
-
-    // Basic CRUD endpoints for your local games
-
     @GetMapping(path = "/games/{gameId}")
     public ResponseEntity<GameDto> getGameById(@PathVariable("gameId") Long gameId) {
         logger.info("=== GET /api/games/{} ===", gameId);
@@ -135,6 +64,25 @@ public class GameController {
         }
     }
 
+    @GetMapping(path = "/games")
+    public ResponseEntity<List<GameDto>> getAllGames() {
+        logger.info("=== GET /api/games ===");
+        logger.info("Fetching all games from database");
+
+        try {
+            List<GameEntity> games = gameService.findAll();
+            List<GameDto> gameDtos = games.stream()
+                    .map(gameMapper::mapTo)
+                    .collect(java.util.stream.Collectors.toList());
+
+            logger.info("Found {} games in database", gameDtos.size());
+            return ResponseEntity.ok(gameDtos);
+        } catch (Exception e) {
+            logger.error("Error fetching all games: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     // Main endpoint: Import first 5 games from IGDB and store them
     @PostMapping(path = "/games/import-from-igdb")
     public ResponseEntity<String> importGamesFromIGDB() {
@@ -142,10 +90,10 @@ public class GameController {
         logger.info("Importing first 5 games from IGDB API...");
 
         try {
-            List<IGDBGameResponse> igdbGames = fetchFirst5GamesFromIGDB();
+            List<IGDBGameResponseDto> igdbGames = fetchFirst5GamesFromIGDB();
 
             int savedCount = 0;
-            for (IGDBGameResponse igdbGame : igdbGames) {
+            for (IGDBGameResponseDto igdbGame : igdbGames) {
                 try {
                     // Check if game already exists to avoid duplicates
                     String externalApiId = "igdb_" + igdbGame.getId();
@@ -175,7 +123,7 @@ public class GameController {
 
     // Private helper methods
 
-    private List<IGDBGameResponse> fetchFirst5GamesFromIGDB() {
+    private List<IGDBGameResponseDto> fetchFirst5GamesFromIGDB() {
         logger.info("Fetching first 5 games from IGDB API...");
 
         HttpHeaders headers = createIGDBHeaders();
@@ -188,14 +136,14 @@ public class GameController {
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
         try {
-            ResponseEntity<IGDBGameResponse[]> response = restTemplate.exchange(
+            ResponseEntity<IGDBGameResponseDto[]> response = restTemplate.exchange(
                     IGDB_GAMES_ENDPOINT,
                     HttpMethod.POST,
                     entity,
-                    IGDBGameResponse[].class
+                    IGDBGameResponseDto[].class
             );
 
-            IGDBGameResponse[] games = response.getBody();
+            IGDBGameResponseDto[] games = response.getBody();
             logger.info("Successfully fetched {} games from IGDB", games != null ? games.length : 0);
             return games != null ? Arrays.asList(games) : List.of();
 
@@ -213,7 +161,7 @@ public class GameController {
         return headers;
     }
 
-    private GameEntity convertIGDBToGameEntity(IGDBGameResponse igdbGame) {
+    private GameEntity convertIGDBToGameEntity(IGDBGameResponseDto igdbGame) {
         GameEntity gameEntity = new GameEntity();
 
         // Set required fields
@@ -241,7 +189,7 @@ public class GameController {
         // Convert platforms list to String array
         if (igdbGame.getPlatforms() != null && !igdbGame.getPlatforms().isEmpty()) {
             String[] platforms = igdbGame.getPlatforms().stream()
-                    .map(IGDBPlatform::getName)
+                    .map(IGDBGameResponseDto.IGDBPlatform::getName)
                     .toArray(String[]::new);
             gameEntity.setPlatforms(platforms);
         }
@@ -249,7 +197,7 @@ public class GameController {
         // Convert genres list to String array
         if (igdbGame.getGenres() != null && !igdbGame.getGenres().isEmpty()) {
             String[] genres = igdbGame.getGenres().stream()
-                    .map(IGDBGenre::getName)
+                    .map(IGDBGameResponseDto.IGDBGenre::getName)
                     .toArray(String[]::new);
             gameEntity.setGenres(genres);
         }
