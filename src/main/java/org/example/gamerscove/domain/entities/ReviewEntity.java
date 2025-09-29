@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "reviews")
 public class ReviewEntity {
@@ -21,11 +20,11 @@ public class ReviewEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "fk_review_user"))
     private UserEntity user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "game_id", nullable = false, foreignKey = @ForeignKey(name = "fk_review_game"))
     private GameEntity game;
 
@@ -44,12 +43,34 @@ public class ReviewEntity {
     @org.hibernate.annotations.CreationTimestamp
     private LocalDateTime createdAt;
 
+    // Default constructor
+    public ReviewEntity() {
+    }
+
     // Constructor with UserEntity and GameEntity objects
     public ReviewEntity(UserEntity user, GameEntity game, Integer rating, String content) {
         this.user = user;
         this.game = game;
         this.rating = rating;
         this.content = content;
+    }
+
+    // Explicit setters for User and Game (Lombok @Data should generate these, but adding explicitly for clarity)
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public void setGame(GameEntity game) {
+        this.game = game;
+    }
+
+    // Explicit getters for User and Game
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public GameEntity getGame() {
+        return game;
     }
 
     // Convenience methods to get IDs (for backward compatibility)

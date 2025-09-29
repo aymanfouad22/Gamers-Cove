@@ -22,13 +22,10 @@ public class ReviewMapperImpl implements Mapper<ReviewEntity, ReviewDto> {
 
     @Override
     public ReviewEntity mapFrom(ReviewDto reviewDto) {
-        return ReviewEntity.builder()
-                .id(reviewDto.getId())
-                .user(reviewDto.getUser())
-                .game(reviewDto.getGame())
-                .rating(reviewDto.getRating())
-                .content(reviewDto.getContent())
-                .createdAt(reviewDto.getCreatedAt())
-                .build();
+        ReviewEntity reviewEntity = new ReviewEntity();
+        reviewEntity.setId(reviewDto.getId());
+        reviewEntity.setRating(reviewDto.getRating());
+        reviewEntity.setContent(reviewDto.getContent());
+        return reviewEntity;
     }
 }

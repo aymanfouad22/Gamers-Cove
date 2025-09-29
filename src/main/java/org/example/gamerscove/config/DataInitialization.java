@@ -1,8 +1,10 @@
 package org.example.gamerscove.config;
 
 import org.example.gamerscove.domain.entities.GameEntity;
+import org.example.gamerscove.domain.entities.ReviewEntity;
 import org.example.gamerscove.domain.entities.UserEntity;
 import org.example.gamerscove.repositories.GameRepository;
+import org.example.gamerscove.repositories.ReviewRepository;
 import org.example.gamerscove.repositories.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
@@ -13,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 @Profile({"dev", "test"})
@@ -21,17 +24,19 @@ public class DataInitialization implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(DataInitialization.class);
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
+    private final ReviewRepository reviewRepository;
 
-    public DataInitialization(UserRepository userRepository,  GameRepository gameRepository) {
+    public DataInitialization(UserRepository userRepository, GameRepository gameRepository, ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
         this.gameRepository = gameRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
         logger.info("=== INITIALIZING SAMPLE DATA (Profile: dev/test) ===");
 
-        if  (gameRepository.count() == 0) {
+        if (gameRepository.count() == 0) {
             createSampleGames();
             logger.info("Game sample data created successfully!");
         } else {
@@ -43,6 +48,13 @@ public class DataInitialization implements CommandLineRunner {
             logger.info("User sample data created successfully!");
         } else {
             logger.info("Database already has user sample, skipping initialization");
+        }
+
+        if (reviewRepository.count() == 0) {
+            createSampleReviews();
+            logger.info("Review sample data created successfully!");
+        } else {
+            logger.info("Database already has review sample, skipping initialization");
         }
 
         logger.info("================================================");
@@ -145,6 +157,43 @@ public class DataInitialization implements CommandLineRunner {
 
         gameRepository.save(game2);
         logger.info("Created game: " + game2.getTitle());
+    }
 
+    private void createSampleReviews() {
+        // Fetch existing users and games
+        Optional<UserEntity> user1 = userRepository.findByUsername("zelda_fan");
+        Optional<UserEntity> user2 = userRepository.findByUsername("fps_master");
+        Optional<GameEntity> game1 = gameRepository.findByTitle("Dying Light: The Beast");
+        Optional<GameEntity> game2 = gameRepository.findByTitle("Minecraft");
+
+        if (user1.isEmpty() || user2.isEmpty() || game1.isEmpty() || game2.isEmpty()) {
+            logger.warn("Cannot create sample reviews - users or games not found");
+            return;
+        }
+
+        // Review 1: zelda_fan reviews Dying Light: The Beast
+        ReviewEntity review1 = new ReviewEntity();
+        review1.setUser(user1.get());
+        review1.setGame(game1.get());
+        review1.setRating(8);
+        review1.setContent("Absolutely thrilling experience! The parkour mechanics are incredibly smooth and the zombie encounters keep you on your toes. " +
+                "The atmosphere is intense and the open-world design gives you plenty of freedom to explore. " +
+                "My only complaint is that some missions feel a bit repetitive, but overall it's a fantastic game that I highly recommend!");
+
+        reviewRepository.save(review1);
+        logger.info("Created review: " + user1.get().getUsername() + " reviewed " + game1.get().getTitle() + " with rating " + review1.getRating() + "/10");
+
+        // Review 2: fps_master reviews Minecraft
+        ReviewEntity review2 = new ReviewEntity();
+        review2.setUser(user2.get());
+        review2.setGame(game2.get());
+        review2.setRating(10);
+        review2.setContent("Minecraft is a timeless masterpiece! The creative freedom is unmatched - you can literally build anything you can imagine. " +
+                "The survival mode provides a perfect balance of challenge and exploration. " +
+                "Whether you're playing solo or with friends, there's always something new to discover. " +
+                "The regular updates keep the game fresh and exciting. A must-play for gamers of all ages!");
+
+        reviewRepository.save(review2);
+        logger.info("Created review: " + user2.get().getUsername() + " reviewed " + game2.get().getTitle() + " with rating " + review2.getRating() + "/10");
     }
 }

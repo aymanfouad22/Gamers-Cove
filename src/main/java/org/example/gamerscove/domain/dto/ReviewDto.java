@@ -19,4 +19,12 @@ public class ReviewDto {
     private Integer rating;
     private String content;
     private LocalDateTime createdAt;
+
+    public Long getUserId() {
+        return user.getId();
+    }
+
+    public Long getGameId() {
+        return game.getId();
+    }
 }
