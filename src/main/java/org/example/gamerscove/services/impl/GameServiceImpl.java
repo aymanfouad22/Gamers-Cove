@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.List;
+
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -73,5 +75,16 @@ public class GameServiceImpl implements GameService {
         logger.info("==============================");
 
         return foundGame;
+    }
+
+    @Override
+    public List<GameEntity> findAll() {
+        logger.info("=== FIND ALL GAMES ===");
+
+        List<GameEntity> games = (List<GameEntity>) gameRepository.findAll();
+        logger.info("Found {} games in database", games.size());
+        logger.info("======================");
+
+        return games;
     }
 }
