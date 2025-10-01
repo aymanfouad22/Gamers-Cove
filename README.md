@@ -213,3 +213,43 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Happy Gaming! 🎮✨** 
+
+# Implementations
+
+## Friendship Feature:
+### Core Functionality
+- Send friend requests
+-  Accept/decline friend requests
+-  Block users
+-  Remove friendships
+-  Check if two users are friends (requested feature)
+-  Get friendship status between users
+-  View all friends (accepted only)
+-  View pending requests (received and sent)
+
+### API Commands:
+- `POST /api/friendships` Send Friend Request
+- `PUT /api/friendships/{friendshipId}/accept` Accept Friend Request
+- `PUT /api/friendships/{friendshipId}/decline` Decline Friend Request
+- `DELETE /api/friendships/{friendshipId}?userId=1`Remove Friendship
+- `GET /api/users/{userId}/friendships` Get all Friendships (All Status)
+- `GET /api/users/{userId}/friends` Get all Friendships (only Accepted)
+- `GET /api/users/{userId}/friend-requests/received` Get requests received
+- `GET /api/users/{userId}/friend-requests/sent` Get requests sent
+- `GET /api/friendships/{friendshipId}` Get Friendships by ID
+
+#### Status Flow: 
+- PENDING → ACCEPTED (receiver accepts)
+- → DECLINED (receiver declines)
+- → BLOCKED (either user blocks)
+
+- Any Status → BLOCKED (when blocking)
+- Any Status → Deleted (when removing friendship)
+- 
+### 🛡️ Business Rules Enforced
+
+- No Self-Friendship: Users cannot send friend requests to themselves
+- No Duplicates: Cannot create multiple friendships between same users
+- Receiver Only: Only the receiver can accept/decline pending requests
+- Bidirectional: Friendship works both ways (User1→User2 is same as User2→User1)
+- Authorization: Users can only remove friendships they're part of
