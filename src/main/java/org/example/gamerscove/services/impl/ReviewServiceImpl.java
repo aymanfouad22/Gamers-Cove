@@ -77,6 +77,22 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public Optional<ReviewEntity> findById(Long id) {
+        logger.info("=== FIND REVIEW BY ID ===");
+        logger.info("Searching for review with ID: {}", id);
+        
+        Optional<ReviewEntity> review = reviewRepository.findById(id);
+        if (review.isPresent()) {
+            logger.info("Found review with ID: {}", id);
+        } else {
+            logger.info("Review not found with ID: {}", id);
+        }
+        logger.info("========================");
+        
+        return review;
+    }
+
+    @Override
     public List<ReviewEntity> findAllReviewsForGame_Id(Long id) {
         logger.info("=== FIND REVIEWS FOR GAME ===");
         logger.info("Searching for all reviews for game ID: {}", id);

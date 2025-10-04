@@ -1,5 +1,6 @@
 package org.example.gamerscove.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,12 +20,23 @@ public class ReviewDto {
     private Integer rating;
     private String content;
     private LocalDateTime createdAt;
+    
+    // Accept userId and gameId from JSON
+    @JsonProperty("userId")
+    private Long userIdInput;
+    
+    @JsonProperty("gameId")
+    private Long gameIdInput;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Long getUserId() {
-        return user.getId();
+        if (userIdInput != null) return userIdInput;
+        return user != null ? user.getId() : null;
     }
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public Long getGameId() {
-        return game.getId();
+        if (gameIdInput != null) return gameIdInput;
+        return game != null ? game.getId() : null;
     }
 }

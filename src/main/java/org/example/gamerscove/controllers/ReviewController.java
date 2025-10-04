@@ -1,5 +1,6 @@
 package org.example.gamerscove.controllers;
 
+import org.example.gamerscove.config.SecurityUtils;
 import org.example.gamerscove.domain.dto.ReviewDto;
 import org.example.gamerscove.domain.entities.GameEntity;
 import org.example.gamerscove.domain.entities.ReviewEntity;
@@ -51,6 +52,14 @@ public class ReviewController {
             // Validate that user and game exist
             Optional<UserEntity> user = userService.findById(reviewDto.getUserId());
             Optional<GameEntity> game = gameService.findById(reviewDto.getGameId());
+            
+            // Verify the authenticated user is creating a review for themselves (if auth is enabled)
+            String currentUserFirebaseUid = SecurityUtils.getCurrentUserFirebaseUid();
+            if (currentUserFirebaseUid != null && user.isPresent() && !SecurityUtils.isResourceOwner(user.get().getFirebaseUid())) {
+                logger.warn("⚠️ User {} attempted to create review for user {}", 
+                           currentUserFirebaseUid, user.get().getFirebaseUid());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
 
             if (user.isEmpty()) {
                 logger.warn("User not found with ID: {}", reviewDto.getUserId());
@@ -71,7 +80,7 @@ public class ReviewController {
             ReviewEntity savedReview = reviewService.createReviewEntity(reviewEntity);
             ReviewDto savedReviewDto = reviewMapper.mapTo(savedReview);
 
-            logger.info("Review created successfully with ID: {}", savedReview.getId());
+            logger.info("✅ Review created successfully with ID: {}", savedReview.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(savedReviewDto);
 
         } catch (Exception e) {
@@ -101,6 +110,14 @@ public class ReviewController {
                 logger.warn("User or Game not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
+            
+            // Verify the authenticated user owns this review (if auth is enabled)
+            String currentUserFirebaseUid = SecurityUtils.getCurrentUserFirebaseUid();
+            if (currentUserFirebaseUid != null && !SecurityUtils.isResourceOwner(user.get().getFirebaseUid())) {
+                logger.warn("⚠️ User {} attempted to update review owned by user {}", 
+                           currentUserFirebaseUid, user.get().getFirebaseUid());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
 
             // Convert and update
             ReviewEntity reviewEntity = reviewMapper.mapFrom(reviewDto);
@@ -110,7 +127,7 @@ public class ReviewController {
             ReviewEntity updatedReview = reviewService.updateReviewEntity(reviewEntity);
             ReviewDto updatedReviewDto = reviewMapper.mapTo(updatedReview);
 
-            logger.info("Review updated successfully");
+            logger.info("✅ Review updated successfully");
             return ResponseEntity.ok(updatedReviewDto);
 
         } catch (IllegalArgumentException e) {
@@ -130,12 +147,25 @@ public class ReviewController {
         logger.info("=============================================");
 
         try {
-            // Create a ReviewEntity with just the ID for deletion
-            ReviewEntity reviewEntity = new ReviewEntity();
-            reviewEntity.setId(reviewId);
-
-            reviewService.deleteReviewEntity(reviewEntity);
-            logger.info("Review deleted successfully");
+            // First, fetch the review to verify ownership
+            Optional<ReviewEntity> existingReview = reviewService.findById(reviewId);
+            if (existingReview.isEmpty()) {
+                logger.warn("Review not found with ID: {}", reviewId);
+                return ResponseEntity.notFound().build();
+            }
+            
+            // Verify the authenticated user owns this review (if auth is enabled)
+            String currentUserFirebaseUid = SecurityUtils.getCurrentUserFirebaseUid();
+            UserEntity reviewOwner = existingReview.get().getUser();
+            if (currentUserFirebaseUid != null && !SecurityUtils.isResourceOwner(reviewOwner.getFirebaseUid())) {
+                logger.warn("⚠️ User {} attempted to delete review owned by user {}", 
+                           currentUserFirebaseUid, reviewOwner.getFirebaseUid());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            
+            // Delete the review
+            reviewService.deleteReviewEntity(existingReview.get());
+            logger.info("✅ Review deleted successfully");
             return ResponseEntity.noContent().build();
 
         } catch (Exception e) {

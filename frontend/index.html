@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamers Cove - API Tester</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Header with Auth -->
+    <header>
+        <div class="container">
+            <h1>🎮 Gamers Cove API Tester</h1>
+            <div class="auth-section">
+                <div id="user-info" style="display: none;">
+                    <img id="user-avatar" src="" alt="User Avatar">
+                    <span id="user-name"></span>
+                    <button id="sign-out-btn" class="btn btn-secondary">Sign Out</button>
+                </div>
+                <button id="sign-in-btn" class="btn btn-primary">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                        <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
+                        <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                        <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.428 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+                    </svg>
+                    Sign in with Google
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div id="status-bar" class="status-bar">
+            <span id="auth-status">🔓 Not Authenticated</span>
+            <span id="api-status">API: <span class="status-dot"></span></span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="game-list">🎮 Game List</button>
+            <button class="tab-btn" data-tab="games">Games API</button>
+            <button class="tab-btn" data-tab="reviews">⭐ Reviews</button>
+            <button class="tab-btn" data-tab="users">👤 Users</button>
+            <button class="tab-btn" data-tab="friendships">👥 Friendships</button>
+        </div>
+
+        <!-- Game List Tab -->
+        <div id="game-list-tab" class="tab-content active">
+            <h2>Game Collection</h2>
+            <div class="search-container">
+                <input type="text" id="game-search" placeholder="Search games..." class="search-input">
+                <button id="search-btn" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+            <div id="game-list" class="game-list">
+                <!-- Games will be loaded here -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading games...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Games API Tab -->
+        <div id="games-tab" class="tab-content">
+            <h2>Games Management</h2>
+            
+            <div class="action-section">
+                <h3>Get All Games (Public)</h3>
+                <button class="btn btn-primary" onclick="getAllGames()">Get All Games</button>
+            </div>
+
+            <div class="action-section">
+                <h3>Get Game by ID (Public)</h3>
+                <input type="number" id="game-id-input" placeholder="Game ID" class="input">
+                <button class="btn btn-primary" onclick="getGameById()">Get Game</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Import Games from IGDB (Protected) 🔒</h3>
+                <button class="btn btn-warning" onclick="importGamesFromIGDB()">Import 5 Games</button>
+            </div>
+
+            <div id="games-result" class="result-box"></div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div id="reviews-tab" class="tab-content">
+            <h2>Reviews Management</h2>
+
+            <div class="action-section">
+                <h3>Get Reviews for Game (Public)</h3>
+                <input type="number" id="game-reviews-id" placeholder="Game ID" class="input">
+                <button class="btn btn-primary" onclick="getGameReviews()">Get Reviews</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Create Review (Protected) 🔒</h3>
+                <p class="info-text">✍️ Write a review as the signed-in user</p>
+                <input type="number" id="review-game-id" placeholder="Game ID" class="input">
+                <input type="number" id="review-rating" placeholder="Rating (1-10)" min="1" max="10" class="input">
+                <textarea id="review-content" placeholder="Review content..." class="textarea"></textarea>
+                <button class="btn btn-success" onclick="createReview()">Create Review</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Update Review (Protected) 🔒</h3>
+                <input type="number" id="update-review-id" placeholder="Review ID" class="input">
+                <input type="number" id="update-rating" placeholder="New Rating (1-10)" min="1" max="10" class="input">
+                <textarea id="update-content" placeholder="Updated content..." class="textarea"></textarea>
+                <button class="btn btn-warning" onclick="updateReview()">Update Review</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Delete Review (Protected) 🔒</h3>
+                <input type="number" id="delete-review-id" placeholder="Review ID" class="input">
+                <button class="btn btn-danger" onclick="deleteReview()">Delete Review</button>
+            </div>
+
+            <div id="reviews-result" class="result-box"></div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users-tab" class="tab-content">
+            <h2>Users Management</h2>
+
+            <div class="action-section">
+                <h3>Create User (Public)</h3>
+                <input type="text" id="user-firebase-uid" placeholder="Firebase UID" class="input">
+                <input type="text" id="user-username" placeholder="Username" class="input">
+                <input type="email" id="user-email" placeholder="Email" class="input">
+                <button class="btn btn-success" onclick="createUser()">Create User</button>
+            </div>
+
+            <div class="action-section">
+                <h3>Get User by Username (Public)</h3>
+                <input type="text" id="username-lookup" placeholder="Username" class="input">
+                <button class="btn btn-primary" onclick="getUserByUsername()">Get User</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Update My Profile (Protected) 🔒</h3>
+                <input type="text" id="update-username" placeholder="New Username" class="input">
+                <textarea id="update-bio" placeholder="Bio..." class="textarea"></textarea>
+                <button class="btn btn-warning" onclick="updateUserProfile()">Update Profile</button>
+            </div>
+
+            <div class="action-section protected">
+                <h3>Get My Favorite Games (Protected) 🔒</h3>
+                <input type="number" id="user-id-favorites" placeholder="User ID" class="input">
+                <button class="btn btn-primary" onclick="getUserFavorites()">Get Favorites</button>
+            </div>
+
+            <div id="users-result" class="result-box"></div>
+        </div>
+
+        <!-- Friendships Tab -->
+        <div id="friendships-tab" class="tab-content">
+            <h2>Friendships Management</h2>
+
+            <div class="action-section protected">
+                <h3>All Friendship Operations (Protected) 🔒</h3>
+                <p class="info-text">⚠️ Friendship endpoints are not yet implemented in the backend.</p>
+                <p class="info-text">These will require authentication when implemented.</p>
+            </div>
+
+            <div id="friendships-result" class="result-box"></div>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Username Modal -->
+    <div id="username-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2>Welcome! 🎮</h2>
+            <p>Please choose a username for your Gamers Cove profile:</p>
+            <input type="text" id="username-input" class="input" placeholder="Enter username" maxlength="20">
+            <p class="hint">This will be your display name in the community</p>
+            <div class="modal-actions">
+                <button id="save-username-btn" class="btn btn-success">Save Username</button>
+                <button id="close-username-modal" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration (load first) -->
+    <script src="config.js"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module" src="js/firebase-config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/api.js"></script>
+    <script type="module" src="js/app.js"></script>
+    <script src="js/gameList.js"></script>
+</body>
+</html>

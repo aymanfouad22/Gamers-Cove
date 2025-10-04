@@ -1,53 +1,132 @@
-# Gamers Cove 🎮
+# 🎮 Gamers Cove
 
-A comprehensive fandom website project about games featuring AI chatbot integration and an AI mini-gameEntity engine.
+A comprehensive gaming platform with user authentication, game database, and review system.
 
 ## 🚀 Features
 
-- **Game Database**: Comprehensive gameEntity information, reviews, and ratings
-- **User Management**: User profiles, favorites, and wishlists
-- **Review System**: User-generated reviews with pros/cons and helpful voting
-- **Comment System**: Nested comments on games and reviews
-- **AI Chatbot**: Intelligent gaming assistant for userEntity queries
-- **AI Mini-Game Engine**: Interactive AI-powered mini-games
-- **Modern UI**: Responsive design with beautiful gaming aesthetics
+- **Game Database**: Comprehensive game information and details
+- **User Authentication**: Secure sign-in with Google
+- **Review System**: User-generated reviews and ratings
+- **Modern UI**: Responsive design with a clean interface
+- **RESTful API**: Fully documented endpoints for integration
 
-## 🏗️ Project Structure
+## 🏗️ Tech Stack
 
-```
-Gamers_Cove/
-├── frontend/                 # React frontend application
-│   ├── pages/               # Page components
-│   ├── components/          # Reusable UI components
-│   ├── assets/             # Images, CSS, icons
-│   ├── utils/              # Helper functions
-│   ├── services/           # API calls
-│   └── tests/              # Frontend tests
-├── backend/                 # Node.js/Express backend
-│   ├── api/                # API endpoints
-│   ├── database/           # Database schemas & migrations
-│   ├── models/             # Data models
-│   ├── controllers/        # Business logic
-│   ├── routes/             # API routes
-│   ├── middlewares/        # Auth, validation, error handling
-│   ├── config/             # Configuration files
-│   ├── services/           # AI services
-│   └── tests/              # Backend tests
-├── docs/                   # Documentation
-└── tests/                  # Integration tests
-```
-
-## 🛠️ Tech Stack
-
-### Backend
-- **Node.js** with **Express.js**
-- **MongoDB** with **Mongoose** ODM
-- **JWT** for authentication
-- **OpenAI API** for AI features
-- **bcrypt** for password hashing
+### Backend (Spring Boot)
+- **Java 17** with **Spring Boot 3.x**
+- **PostgreSQL** for data persistence
+- **Spring Security** with JWT authentication
+- **Hibernate** ORM
+- **Maven** for dependency management
 
 ### Frontend
-- **React.js** with modern hooks
+- **HTML5**, **CSS3**, **JavaScript**
+- **Firebase Authentication**
+- **Fetch API** for backend communication
+- **Responsive Design** for all devices
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Java 17 or higher
+- Maven 3.6+
+- Node.js 16+ (for frontend)
+- PostgreSQL 13+
+- Firebase project (for authentication)
+
+### Backend Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/gamers-cove.git
+   cd gamers-cove
+   ```
+
+2. **Configure database**
+   - Create a PostgreSQL database
+   - Update `application.properties` with your database credentials
+
+3. **Build and run**
+   ```bash
+   mvn clean install
+   mvn spring-boot:run
+   ```
+   The backend will be available at `http://localhost:8080`
+
+### Frontend Setup
+
+1. **Install dependencies**
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. **Configure Firebase**
+   - Create a Firebase project
+   - Add your Firebase config in `firebase-config.js`
+   - Enable Google Sign-In in Firebase Console
+
+3. **Start the development server**
+   ```bash
+   npm start
+   ```
+   The frontend will be available at `http://localhost:3000`
+
+## 🔧 Environment Variables
+
+Create a `.env` file in the root directory:
+
+```
+# Backend
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/gamerscove
+SPRING_DATASOURCE_USERNAME=your_username
+SPRING_DATASOURCE_PASSWORD=your_password
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRATION_MS=86400000
+
+# Frontend
+REACT_APP_FIREBASE_API_KEY=your_firebase_api_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_firebase_project_id
+```
+
+## 📚 API Documentation
+
+Once the backend is running, access the API documentation at:
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI (JSON): `http://localhost:8080/v3/api-docs`
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+mvn test
+```
+
+### Frontend Tests
+```bash
+cd frontend
+npm test
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [Spring Boot](https://spring.io/projects/spring-boot)
+- [Firebase](https://firebase.google.com/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Maven](https://maven.apache.org/)
 - **CSS3** with responsive design
 - **Axios** for API communication
 
