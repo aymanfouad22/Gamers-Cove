@@ -39,3 +39,5 @@ logs
 *.log
 target/
 *-firebase-adminsdk-*.json
+target/
+src/main/resources/*firebase-adminsdk-*.json
