@@ -37,3 +37,5 @@ dist/
 # Logs
 logs
 *.log
+target/
+*-firebase-adminsdk-*.json
